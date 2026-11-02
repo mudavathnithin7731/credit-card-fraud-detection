@@ -1,0 +1,14 @@
+# Compiled Java class files
+bin/
+*.class
+
+# Test exports and artifacts
+test_benchmark_transactions.csv
+transactions_export.csv
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
