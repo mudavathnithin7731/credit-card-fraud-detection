@@ -1,6 +1,8 @@
-# Credit Card Fraud Detection System (Java)
+# Credit Card Fraud Detection System (Java & Cloud Web Portal)
 
-An academic-grade, end-to-end **Credit Card Fraud Detection System** developed in **Java (OpenJDK 21)**. The system implements a **Hybrid Fusion Architecture** combining a **Supervised Machine Learning Random Forest Classifier** with a **Multi-Factor Rule-Based Heuristic Engine**.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mudavathnithin7731/credit-card-fraud-detection)
+
+An academic-grade, end-to-end **Credit Card Fraud Detection System** developed in **Java (OpenJDK 21)** with a live **Cloud Web Portal & REST API deployed on Vercel**. The system implements a **Hybrid Fusion Architecture** combining a **Supervised Machine Learning Random Forest Classifier** with a **Multi-Factor Rule-Based Heuristic Engine**.
 
 ---
 
