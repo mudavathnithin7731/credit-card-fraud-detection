@@ -1,0 +1,18 @@
+{
+  "name": "credit-card-fraud-detection",
+  "version": "1.0.0",
+  "description": "Credit Card Fraud Detection System with Hybrid ML and Heuristic Engine",
+  "main": "api/engine.js",
+  "scripts": {
+    "start": "node -e \"console.log('Vercel ready')\""
+  },
+  "keywords": [
+    "fraud-detection",
+    "credit-card",
+    "machine-learning",
+    "random-forest",
+    "java"
+  ],
+  "author": "Nithin",
+  "license": "MIT"
+}

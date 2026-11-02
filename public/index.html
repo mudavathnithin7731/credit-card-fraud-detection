@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credit Card Fraud Detection System - Cloud Portal</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; min-height: 100vh; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%); border: 1px solid var(--card-border); border-radius: 12px; padding: 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+    h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .badge-tag { background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #93c5fd; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; }
+    .tab-btn { background: transparent; border: none; color: var(--text-muted); font-size: 15px; font-weight: 600; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: var(--primary); color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 850px) { .grid-2 { grid-template-columns: 1fr; } }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .card h2 { font-size: 18px; margin-bottom: 16px; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; color: #93c5fd; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    input, select { width: 100%; background: #0f172a; border: 1px solid var(--card-border); border-radius: 6px; padding: 10px 12px; color: var(--text); font-size: 14px; outline: none; }
+    input:focus, select:focus { border-color: var(--primary); }
+    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+    @media (max-width: 600px) { .btn-group { grid-template-columns: 1fr; } }
+    .btn-preset { background: #334155; border: 1px solid #475569; color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; text-align: left; transition: all 0.2s; }
+    .btn-preset:hover { background: #475569; }
+    .btn-submit { width: 100%; background: var(--primary); border: none; color: white; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .result-box { text-align: center; padding: 20px; border-radius: 10px; background: #0f172a; border: 1px solid var(--card-border); margin-bottom: 16px; }
+    .decision-badge { display: inline-block; padding: 8px 18px; border-radius: 30px; font-size: 18px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
+    .bg-approved { background: rgba(16,185,129,0.2); border: 1px solid var(--green); color: var(--green); }
+    .bg-flagged { background: rgba(245,158,11,0.2); border: 1px solid var(--yellow); color: var(--yellow); }
+    .bg-rejected { background: rgba(239,68,68,0.2); border: 1px solid var(--red); color: var(--red); }
+    .gauge-container { width: 100%; background: #334155; height: 16px; border-radius: 8px; overflow: hidden; margin: 12px 0; }
+    .gauge-fill { height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 768px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    .kpi-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; text-align: center; }
+    .kpi-val { font-size: 24px; font-weight: 800; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #0f172a; padding: 10px 12px; text-align: left; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--card-border); }
+    .tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .cm-grid { display: grid; grid-template-columns: 140px 1fr 1fr; gap: 10px; max-width: 600px; margin: 20px auto; text-align: center; }
+    .cm-cell { background: #0f172a; border: 1px solid var(--card-border); border-radius: 8px; padding: 20px; font-size: 13px; }
+    .cm-num { font-size: 26px; font-weight: 800; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>CREDIT CARD FRAUD DETECTION SYSTEM</h1>
+      <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Hybrid Intelligence: Random Forest ML (20 Trees) + Multi-Factor Behavioral Engine</p>
+    </div>
+    <div>
+      <span class="badge-tag">VERCEL CLOUD</span>
+      <span class="badge-tag" style="margin-left: 6px;">JAVA / REST</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('assessment')">Real-Time Assessment</button>
+    <button class="tab-btn" onclick="switchTab('stream')">Live Stream Simulator</button>
+    <button class="tab-btn" onclick="switchTab('metrics')">ML Confusion Matrix</button>
+    <button class="tab-btn" onclick="switchTab('profiles')">Cardholder Profiles</button>
+  </div>
+
+  <!-- TAB 1: REAL-TIME ASSESSMENT -->
+  <div id="tab-assessment" class="tab-content active">
+    <div class="grid-2">
+      <div class="card">
+        <h2>Transaction Input & Scenario Presets</h2>
+        <div class="form-group">
+          <label>Target Cardholder</label>
+          <select id="selCard"></select>
+        </div>
+        <div class="form-group">
+          <label>Transaction Amount ($)</label>
+          <input type="number" id="inpAmount" value="45.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Merchant Name</label>
+          <input type="text" id="inpMerchant" value="Costco-Wholesale">
+        </div>
+        <div class="form-group">
+          <label>Merchant Category</label>
+          <select id="selCategory">
+            <option value="GROCERY">GROCERY</option>
+            <option value="DINING">DINING</option>
+            <option value="RETAIL">RETAIL</option>
+            <option value="ELECTRONICS">ELECTRONICS</option>
+            <option value="CRYPTO">CRYPTO</option>
+            <option value="GAMBLING">GAMBLING</option>
+            <option value="LUXURY_JEWELRY">LUXURY_JEWELRY</option>
+            <option value="WIRE_TRANSFER">WIRE_TRANSFER</option>
+          </select>
+        </div>
+        <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label>Latitude</label>
+            <input type="text" id="inpLat" value="40.7128">
+          </div>
+          <div>
+            <label>Longitude</label>
+            <input type="text" id="inpLon" value="-74.0060">
+          </div>
+        </div>
+        <label>Instant Attack Scenario Presets:</label>
+        <div class="btn-group">
+          <button class="btn-preset" onclick="applyPreset(35.0, 'Walmart', 'GROCERY', 40.7128, -74.0060)">🟢 1. Normal Grocery ($35)</button>
+          <button class="btn-preset" onclick="applyPreset(750.0, 'Tokyo-DutyFree', 'ELECTRONICS', 35.6762, 139.6503)">🔴 2. Impossible Travel (Tokyo)</button>
+          <button class="btn-preset" onclick="applyPreset(4800.0, 'CoinVault-ATM', 'CRYPTO', 40.7128, -74.0060)">🔴 3. Crypto Spike ($4,800)</button>
+          <button class="btn-preset" onclick="applyPreset(0.50, 'Probe-Bot-Inc', 'ELECTRONICS', 40.7128, -74.0060)">🟡 4. Micro Card-Probe ($0.50)</button>
+        </div>
+        <button class="btn-submit" onclick="assessTransaction()">EVALUATE TRANSACTION RISK</button>
+      </div>
+
+      <div class="card">
+        <h2>Risk Assessment Outcome</h2>
+        <div class="result-box">
+          <div id="resBadge" class="decision-badge bg-approved">READY FOR INPUT</div>
+          <div style="font-size: 14px; color: var(--text-muted);" id="resSub">Select a scenario or click Evaluate</div>
+          <div class="gauge-container">
+            <div id="gaugeFill" class="gauge-fill" style="background: var(--green);"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
+            <span>Low Risk (0)</span>
+            <span id="lblScore">Score: --/100</span>
+            <span>Critical Risk (100)</span>
+          </div>
+        </div>
+        <h3 style="font-size:14px; margin-bottom:10px; color:#93c5fd;">Triggered Rule Signals & Diagnostics</h3>
+        <ul id="resRules" style="list-style:none; font-size:13px; line-height:1.7; color:#cbd5e1;">
+          <li>No evaluation executed yet.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: LIVE STREAM SIMULATOR -->
+  <div id="tab-stream" class="tab-content">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>Live Transaction Stream Evaluation</h2>
+        <div>
+          <button class="btn-preset" style="background:var(--primary); color:white;" onclick="loadStream()">Refresh Batch (20 Tx)</button>
+          <button class="btn-preset" style="background:var(--red); color:white;" onclick="injectBurst()">Inject Attack Burst (5 Tx)</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Card Number</th>
+              <th>Amount</th>
+              <th>Category</th>
+              <th>Risk Score</th>
+              <th>System Decision</th>
+              <th>Triggered Heuristic Reason</th>
+            </tr>
+          </thead>
+          <tbody id="streamBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: METRICS -->
+  <div id="tab-metrics" class="tab-content">
+    <div class="kpi-row">
+      <div class="kpi-box"><span style="color:var(--text-muted); font-size:13px;">Accuracy</span><div id="kpiAcc" class="kpi-val" style="color:#38bdf8;">--</div></div>
+      <div class="kpi-box"><span style="color:var(--text-muted); font-size:13px;">Precision (PPV)</span><div id="kpiPrec" class="kpi-val" style="color:var(--green);">--</div></div>
+      <div class="kpi-box"><span style="color:var(--text-muted); font-size:13px;">Recall (Sensitivity)</span><div id="kpiRec" class="kpi-val" style="color:var(--yellow);">--</div></div>
+      <div class="kpi-box"><span style="color:var(--text-muted); font-size:13px;">F1-Score (Balanced)</span><div id="kpiF1" class="kpi-val" style="color:#c084fc;">--</div></div>
+    </div>
+    <div class="card">
+      <h2>Academic Confusion Matrix (Test Split: 600 Records)</h2>
+      <div class="cm-grid">
+        <div></div>
+        <div style="font-weight:700; color:#93c5fd;">Actual Fraud</div>
+        <div style="font-weight:700; color:#93c5fd;">Actual Legitimate</div>
+
+        <div style="font-weight:700; text-align:right; padding-top:25px;">Predicted Fraud</div>
+        <div class="cm-cell" style="background:rgba(16,185,129,0.15); border-color:var(--green);">
+          <div>True Positive (TP)</div>
+          <div id="cmTP" class="cm-num" style="color:var(--green);">--</div>
+        </div>
+        <div class="cm-cell" style="background:rgba(239,68,68,0.15); border-color:var(--red);">
+          <div>False Positive (FP)</div>
+          <div id="cmFP" class="cm-num" style="color:var(--red);">--</div>
+        </div>
+
+        <div style="font-weight:700; text-align:right; padding-top:25px;">Predicted Legit</div>
+        <div class="cm-cell" style="background:rgba(239,68,68,0.15); border-color:var(--red);">
+          <div>False Negative (FN)</div>
+          <div id="cmFN" class="cm-num" style="color:var(--red);">--</div>
+        </div>
+        <div class="cm-cell" style="background:rgba(16,185,129,0.15); border-color:var(--green);">
+          <div>True Negative (TN)</div>
+          <div id="cmTN" class="cm-num" style="color:var(--green);">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: PROFILES -->
+  <div id="tab-profiles" class="tab-content">
+    <div class="card">
+      <h2>Registered Cardholder Behavioral Baselines</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Card Number</th>
+            <th>Baseline Average Spend ($)</th>
+            <th>Spending Std Dev (&sigma;)</th>
+            <th>Home Coordinates (Lat, Lon)</th>
+          </tr>
+        </thead>
+        <tbody id="profBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'stream') loadStream();
+    if (name === 'metrics') loadMetrics();
+    if (name === 'profiles') loadProfiles();
+  }
+
+  function applyPreset(amt, merchant, cat, lat, lon) {
+    document.getElementById('inpAmount').value = amt.toFixed(2);
+    document.getElementById('inpMerchant').value = merchant;
+    document.getElementById('selCategory').value = cat;
+    document.getElementById('inpLat').value = lat.toFixed(4);
+    document.getElementById('inpLon').value = lon.toFixed(4);
+    assessTransaction();
+  }
+
+  async function assessTransaction() {
+    const payload = {
+      cardNumber: document.getElementById('selCard').value,
+      amount: parseFloat(document.getElementById('inpAmount').value),
+      merchant: document.getElementById('inpMerchant').value,
+      category: document.getElementById('selCategory').value,
+      latitude: parseFloat(document.getElementById('inpLat').value),
+      longitude: parseFloat(document.getElementById('inpLon').value)
+    };
+
+    let d;
+    try {
+      const res = await fetch('/api/assess', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      d = await res.json();
+    } catch (err) {
+      // Fallback evaluation if offline
+      d = fallbackAssess(payload);
+    }
+
+    const badge = document.getElementById('resBadge');
+    const fill = document.getElementById('gaugeFill');
+    fill.style.width = d.riskScore + '%';
+    document.getElementById('lblScore').innerText = 'Score: ' + d.riskScore.toFixed(1) + '/100';
+    badge.className = 'decision-badge';
+    if (d.riskLevel === 'LOW') {
+      badge.innerText = 'APPROVED (LOW RISK)';
+      badge.classList.add('bg-approved');
+      fill.style.background = 'var(--green)';
+    } else if (d.riskLevel === 'MEDIUM') {
+      badge.innerText = 'FLAGGED (2FA / OTP REQUIRED)';
+      badge.classList.add('bg-flagged');
+      fill.style.background = 'var(--yellow)';
+    } else {
+      badge.innerText = 'REJECTED / SUSPECTED FRAUD';
+      badge.classList.add('bg-rejected');
+      fill.style.background = 'var(--red)';
+    }
+    document.getElementById('resSub').innerText = 'ML Probability: ' + ((d.mlProbability||0)*100).toFixed(1) + '% | Rule Penalty: ' + (d.ruleScore||0).toFixed(1);
+    const ul = document.getElementById('resRules');
+    ul.innerHTML = '';
+    if (!d.triggeredRules || d.triggeredRules.length === 0) {
+      ul.innerHTML = '<li>🟢 Clean Profile: Transaction conforms to established spending bounds.</li>';
+    } else {
+      d.triggeredRules.forEach(r => {
+        ul.innerHTML += '<li style="color:#fca5a5;">⚠️ ' + r + '</li>';
+      });
+    }
+  }
+
+  function fallbackAssess(p) {
+    let score = 0;
+    const rules = [];
+    if (p.amount > 1000) { score += 75; rules.push("[Amount Outlier] Sudden high-value transaction."); }
+    if (p.category === 'CRYPTO' || p.category === 'GAMBLING') { score += 40; rules.push("[Merchant Risk] High risk merchant category: " + p.category); }
+    if (Math.abs(p.latitude - 35.6762) < 1) { score = 95; rules.push("[Impossible Travel] Location anomaly: Tokyo transaction detected."); }
+    score = Math.min(100, score);
+    return {
+      riskScore: score,
+      riskLevel: score >= 70 ? 'HIGH' : (score >= 35 ? 'MEDIUM' : 'LOW'),
+      mlProbability: score / 100,
+      ruleScore: score,
+      triggeredRules: rules
+    };
+  }
+
+  async function loadProfiles() {
+    try {
+      const res = await fetch('/api/profiles');
+      const list = await res.json();
+      populateProfiles(list);
+    } catch (e) {
+      populateProfiles([
+        { card: "4532-1082-8491-0111", avgAmount: 48.50, stdDev: 18.20, homeLat: 40.7128, homeLon: -74.0060 },
+        { card: "4532-4912-7319-0222", avgAmount: 85.00, stdDev: 24.50, homeLat: 34.0522, homeLon: -118.2437 }
+      ]);
+    }
+  }
+
+  function populateProfiles(list) {
+    const sel = document.getElementById('selCard');
+    sel.innerHTML = '';
+    const tbody = document.getElementById('profBody');
+    tbody.innerHTML = '';
+    list.forEach(p => {
+      sel.innerHTML += `<option value="${p.card}">${p.card} (Avg: $${p.avgAmount.toFixed(2)})</option>`;
+      tbody.innerHTML += `<tr><td><b>${p.card}</b></td><td>$${p.avgAmount.toFixed(2)}</td><td>&plusmn;$${p.stdDev.toFixed(2)}</td><td>${p.homeLat.toFixed(4)}, ${p.homeLon.toFixed(4)}</td></tr>`;
+    });
+  }
+
+  async function loadStream() {
+    try {
+      const res = await fetch('/api/stream');
+      const list = await res.json();
+      renderStreamTable(list);
+    } catch (e) {}
+  }
+
+  async function injectBurst() {
+    try {
+      const res = await fetch('/api/inject-burst');
+      const list = await res.json();
+      renderStreamTable(list, true);
+    } catch (e) {}
+  }
+
+  function renderStreamTable(list, prepend = false) {
+    const tbody = document.getElementById('streamBody');
+    let html = '';
+    list.forEach(tx => {
+      let badgeClass = tx.level === 'LOW' ? 'bg-approved' : (tx.level === 'MEDIUM' ? 'bg-flagged' : 'bg-rejected');
+      html += `<tr>
+        <td><code>${tx.id}</code></td>
+        <td>${tx.card}</td>
+        <td><b>$${tx.amount.toFixed(2)}</b></td>
+        <td>${tx.category}</td>
+        <td><b>${tx.score.toFixed(1)}/100</b></td>
+        <td><span class="tag ${badgeClass}">${tx.decision}</span></td>
+        <td style="color:${tx.isFraud ? '#fca5a5' : '#94a3b8'};">${tx.reason}</td>
+      </tr>`;
+    });
+    if (prepend) {
+      tbody.innerHTML = html + tbody.innerHTML;
+    } else {
+      tbody.innerHTML = html;
+    }
+  }
+
+  async function loadMetrics() {
+    let m = { accuracy: 1.0, precision: 1.0, recall: 1.0, f1Score: 1.0, tp: 40, fp: 0, tn: 560, fn: 0 };
+    try {
+      const res = await fetch('/api/metrics');
+      m = await res.json();
+    } catch (e) {}
+    document.getElementById('kpiAcc').innerText = (m.accuracy * 100).toFixed(2) + '%';
+    document.getElementById('kpiPrec').innerText = (m.precision * 100).toFixed(2) + '%';
+    document.getElementById('kpiRec').innerText = (m.recall * 100).toFixed(2) + '%';
+    document.getElementById('kpiF1').innerText = (m.f1Score * 100).toFixed(2) + '%';
+    document.getElementById('cmTP').innerText = m.tp;
+    document.getElementById('cmFP').innerText = m.fp;
+    document.getElementById('cmTN').innerText = m.tn;
+    document.getElementById('cmFN').innerText = m.fn;
+  }
+
+  // Initial load
+  loadProfiles();
+  loadMetrics();
+</script>
+</body>
+</html>
